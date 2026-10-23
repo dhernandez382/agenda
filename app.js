@@ -338,7 +338,7 @@ async function taxAGoogle() {
 }
 
 async function vistaDias() {
-  $('#titulo').textContent = 'Fechas';
+  $('#titulo').textContent = 'Efemérides';
   $('#subtitulo').textContent = 'Importantes y efemérides';
   const propias = S.eventos.filter(e => e.tipo === 'fecha').sort((a, b) => a.fecha.slice(5).localeCompare(b.fecha.slice(5)));
   const clave = `${pad(fechaEfe.getMonth() + 1)}-${pad(fechaEfe.getDate())}`;
