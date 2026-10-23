@@ -95,6 +95,23 @@ async function eventosGoogle(desde, hasta) {
   } catch (e) { avisar(e.message); return []; }
 }
 
+/* Cumpleaños: Google los guarda en un calendario aparte ("Cumpleaños", sale de tus contactos) */
+const CAL_CUMPLES = 'addressbook#contacts@group.v.calendar.google.com';
+let cumplesCache = null, cumplesError = '';
+async function cumplesEntre(desde, hasta) {
+  if (!conectado()) return [];
+  const clave = ymd(desde) + ymd(hasta);
+  if (cumplesCache && cumplesCache.clave === clave && Date.now() - cumplesCache.t < 300000) return cumplesCache.lista;
+  const q = new URLSearchParams({ timeMin: desde.toISOString(), timeMax: hasta.toISOString(), singleEvents: 'true', orderBy: 'startTime', maxResults: '250' });
+  try {
+    const j = await g(`https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(CAL_CUMPLES)}/events?` + q);
+    const lista = (j.items || []).filter(e => e.status !== 'cancelled' && e.start && e.start.date).map(e => ({
+      id: 'cumple-' + e.id, origen: 'google', tipo: 'cumple', cumple: true, titulo: (e.summary || 'Cumpleaños').replace(/^Cumpleaños de\s*/i, ''), fecha: e.start.date, hora: '', notas: '' }));
+    cumplesCache = { clave, t: Date.now(), lista }; cumplesError = '';
+    return lista;
+  } catch (e) { cumplesError = e.message; return []; }
+}
+
 async function crearEnGoogle(ev) {
   const cuerpo = { summary: ev.titulo, description: ev.notas || '', extendedProperties: { private: { app: 'agenda', ...(ev.taxKey ? { taxKey: ev.taxKey } : {}) } } };
   if (ev.hora) {
@@ -138,7 +155,8 @@ async function agendaEntre(desde, hasta) {
   const mios = new Set(S.eventos.map(e => e.gId).filter(Boolean));
   const deG = (await eventosGoogle(desde, hasta)).filter(e => !(mios.has(e.id) || mios.has(e.base) || e.propia === 'agenda'));
   const imp = impuestosEntre(desde, hasta).map(t => ({ id: 'tax-' + t.key, origen: 'dgii', titulo: `${t.ob.form} · ${t.ob.nombre}`, fecha: ymd(t.due), hora: '', tipo: 'dgii', notas: t.periodo, taxKey: t.key, hecho: !!S.taxHecho[t.key] }));
-  return [...locales, ...deG, ...imp].sort((a, b) => (a.fecha + (a.hora || '00:00')).localeCompare(b.fecha + (b.hora || '00:00')));
+  const cumples = await cumplesEntre(desde, hasta);
+  return [...locales, ...deG, ...cumples, ...imp].sort((a, b) => (a.fecha + (a.hora || '00:00')).localeCompare(b.fecha + (b.hora || '00:00')));
 }
 
 /* ---------- DGII ---------- */
@@ -217,7 +235,7 @@ const lunesDe = d => { const x = inicioDia(d); return sumaDias(x, -((x.getDay() 
 const semanaISO = d => { const t = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate())); t.setUTCDate(t.getUTCDate() + 4 - (t.getUTCDay() || 7)); return Math.ceil(((t - Date.UTC(t.getUTCFullYear(), 0, 1)) / 86400000 + 1) / 7); };
 const claveCheck = e => e.origen === 'dgii' ? 'tax:' + e.taxKey : `ev:${e.id}|${e.fecha}`;
 const estaHecho = e => e.origen === 'dgii' ? !!S.taxHecho[e.taxKey] : !!S.hechos[`${e.id}|${e.fecha}`];
-const textoItem = e => esc(e.titulo) + (e.hora ? ` <small>(${esc(hora12(e.hora))})</small>` : '') + (e.origen === 'dgii' ? ' <span class="etq dgii">DGII</span>' : e.origen === 'google' ? ' <span class="etq google">Google</span>' : '');
+const textoItem = e => (e.cumple ? '🎂 ' : '') + esc(e.titulo) + (e.cumple ? ' <span class="etq fecha">CUMPLEAÑOS</span>' : '') + (e.hora ? ` <small>(${esc(hora12(e.hora))})</small>` : '') + (e.origen === 'dgii' ? ' <span class="etq dgii">DGII</span>' : e.origen === 'google' && !e.cumple ? ' <span class="etq google">Google</span>' : '');
 
 function editarTexto(titulo, ayuda, valor, cb) {
   $('#txtTitulo').textContent = titulo; $('#txtAyuda').textContent = ayuda; $('#formTexto').texto.value = valor;
@@ -248,7 +266,12 @@ async function vistaSemana() {
   const nav = `<div class="grupo"><button class="mini sec" data-sem="-1">‹ Anterior</button><button class="mini sec" data-sem="0">Esta semana</button><button class="mini sec" data-sem="1">Siguiente ›</button></div>`;
   V.innerHTML = nav + '<p class="vacio">Cargando…</p>';
   const todos = await agendaEntre(lun, fin);
+  const hoyD = inicioDia(new Date());
+  const cumpleProx = (await cumplesEntre(hoyD, sumaDias(hoyD, 31))).slice(0, 8);
   if (vista !== 'hoy') return;
+  const cumpleHtml = !conectado() ? '<p class="vacio">Conecta Google para ver los cumpleaños de tus contactos.</p>'
+    : cumpleProx.length ? cumpleProx.map(c => { const d = parseYmd(c.fecha), n = diasHasta(d); return `<div class="rec"><span class="barra-c" style="background:#E5484D"></span><div><b>🎂 ${esc(c.titulo)}</b><small>${esc(nombreDia(d))}</small></div><span class="cuando">${n === 0 ? '¡HOY!' : n === 1 ? 'mañana' : 'en ' + n + ' días'}</span><span></span></div>`; }).join('')
+    : `<p class="vacio">${cumplesError ? 'No pude leer el calendario de cumpleaños: ' + esc(cumplesError) : 'Sin cumpleaños en los próximos 30 días.'}</p>`;
 
   let dias = '';
   for (let i = 0; i < 7; i++) {
@@ -271,6 +294,7 @@ async function vistaSemana() {
   V.innerHTML = nav + `<div class="semana"><div class="dias">${dias}</div>
     <div>
       <div class="panel"><div class="panel-t"><div><h3>🔔 Recordatorios</h3><small>NO LO OLVIDES</small></div><div class="rango">${lun.getDate()} – ${dom.getDate()}<br>${MESES[dom.getMonth()].slice(0, 3)[0].toUpperCase() + MESES[dom.getMonth()].slice(1, 3)} ${dom.getFullYear()}</div></div>${recHtml}${recs.some(e => e.notas && e.notas.startsWith('Vencido')) ? '<button class="mini sec" id="todoHecho">Marcar vencidos como hechos</button>' : ''}</div>
+      <div class="panel"><div class="panel-t"><div><h3>🎂 Cumpleaños</h3><small>PRÓXIMOS 30 DÍAS</small></div></div>${cumpleHtml}</div>
       <div class="panel"><div class="panel-t"><div><h3>📒 Apuntes importantes</h3><small>IDEAS · DATOS · PLANES</small></div><button class="mini sec" id="editApuntes">Editar</button></div>${apuntesHtml()}</div>
       <div class="panel efe" id="efeHoy"><div class="panel-t"><div><h3>📅 Un día como hoy</h3></div></div><p class="nota">Cargando…</p></div>
     </div></div>

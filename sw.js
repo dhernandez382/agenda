@@ -1,5 +1,5 @@
 /* Mi Agenda · service worker: guarda la app para abrirla sin internet. Los datos de Google nunca se guardan aquí. */
-const VERSION = 'agenda-v4';
+const VERSION = 'agenda-v5';
 const ARCHIVOS = ['./', 'index.html', 'styles.css', 'app.js', 'datos.js', 'manifest.webmanifest', 'icons/icon-192.png', 'icons/icon-512.png'];
 
 self.addEventListener('install', e => {
