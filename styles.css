@@ -1,0 +1,118 @@
+/* Mi Agenda · diseño de planificador semanal: azul marino, tarjetas claras y un color por día */
+:root{--marino:#0E3A66;--marino2:#14518F;--fondo:#EEF2F7;--tarjeta:#fff;--tinta:#1E2A3A;--suave:#5F6B7D;--linea:#DCE3EC;--acento:#14518F;
+  --ok:#1F9D55;--alerta:#D9344A;--ambar:#B7791F;--sombra:0 4px 18px rgba(14,58,102,.10);color-scheme:light;
+  --c-lun:#1F66B4;--c-mar:#3E9B4E;--c-mie:#D9344A;--c-jue:#6C42A8;--c-vie:#1FA3A8;--c-sab:#E5A31E;--c-dom:#6B7585}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{font:15px/1.45 Inter,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;background:var(--fondo);color:var(--tinta);padding-bottom:calc(78px + env(safe-area-inset-bottom))}
+.script{font-family:'Great Vibes','Segoe Script','Brush Script MT',cursive}
+.nota-manual{font-family:Caveat,'Segoe Script',cursive}
+
+/* ----- encabezado ----- */
+.top{background:linear-gradient(115deg,var(--marino) 0%,var(--marino) 62%,#2C5E96 62.2%,#1B4577 100%);color:#fff;padding:max(16px,env(safe-area-inset-top)) 18px 16px;position:relative;overflow:hidden}
+.top-in{max-width:1200px;margin:0 auto;display:flex;justify-content:space-between;gap:14px;align-items:flex-end}
+.marca h1{margin:0;padding-top:8px;font:700 clamp(30px,6.5vw,52px)/1.15 'Times New Roman',Times,serif;letter-spacing:.01em}
+.marca .sem{letter-spacing:.42em;font-size:clamp(14px,2.6vw,22px);font-weight:500;margin:2px 0 8px;display:block}
+.marca .lema{font-size:11px;letter-spacing:.22em;opacity:.9;border-top:1px solid rgba(255,255,255,.35);padding-top:8px;display:inline-block}
+.frase{font:400 clamp(17px,3vw,23px)/1.2 Caveat,'Segoe Script',cursive;opacity:.95;max-width:200px;text-align:right}
+.chip{border:1px solid rgba(255,255,255,.55);background:rgba(255,255,255,.12);color:#fff;border-radius:999px;padding:6px 12px;font-size:12px;font-weight:600;position:absolute;right:14px;top:max(10px,env(safe-area-inset-top))}
+.chip.on{background:#1F9D55;border-color:#1F9D55}
+.barra{max-width:1200px;margin:0 auto;padding:14px 16px 4px;display:flex;justify-content:space-between;align-items:center;gap:10px}
+.barra h2{margin:0;font-size:19px;color:var(--marino);text-transform:none;letter-spacing:0}
+.barra h2 small{display:block;font-weight:500;color:var(--suave);font-size:13px;margin-top:1px}
+.pill{background:#D6E6F8;color:var(--marino);border-radius:999px;padding:5px 14px;font-weight:700;font-size:14px;white-space:nowrap}
+
+main{max-width:1200px;margin:0 auto;padding:6px 16px 24px}
+.semana{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);gap:18px;align-items:start}
+@media (max-width:900px){.semana{grid-template-columns:1fr}}
+h2.sec-t{font-size:12px;text-transform:uppercase;letter-spacing:.1em;color:var(--suave);margin:20px 0 8px}
+
+/* ----- días de la semana ----- */
+.dias{display:grid;gap:10px}
+.dia-fila{display:grid;grid-template-columns:78px 1fr;background:var(--tarjeta);border:1px solid var(--linea);border-radius:12px;overflow:hidden;box-shadow:var(--sombra)}
+.dia-fila.hoy{outline:2px solid var(--marino2);outline-offset:1px}
+.dia-pil{color:#fff;text-align:center;padding:10px 4px;display:flex;flex-direction:column;justify-content:center;gap:0;position:relative}
+.dia-pil b{font-size:13px;font-weight:600;letter-spacing:.06em}
+.dia-pil strong{font-size:32px;line-height:1.05;font-weight:800}
+.dia-pil span{font-size:13px;opacity:.95}
+.mas-b{background:none;border:0;color:var(--acento);font-size:12.5px;font-weight:600;padding:4px 0 0;opacity:.8}
+.marca .lema{white-space:nowrap}
+.marca{min-width:0}
+@media (max-width:640px){
+  .top{padding-top:52px}
+  .top-in{flex-direction:column;align-items:flex-start;gap:12px}
+  .frase{max-width:none;text-align:left;border-top:1px solid rgba(255,255,255,.25);padding-top:10px;width:100%}
+}
+html,body{overflow-x:hidden}
+.frase small{display:block;font:600 11px Inter,system-ui,sans-serif;letter-spacing:.12em;text-transform:uppercase;opacity:.8;margin-top:4px}
+.marca .lema{font-size:10.5px;letter-spacing:.16em}
+.dia-cuerpo{display:grid;grid-template-columns:1fr auto;gap:10px;padding:10px 12px;align-items:center}
+@media (max-width:520px){.dia-cuerpo{grid-template-columns:1fr}.dia-frase{display:none}}
+.dia-frase{font:400 16px/1.15 Caveat,'Segoe Script',cursive;color:#3D5B80;max-width:130px;text-align:center;border-left:1px dashed var(--linea);padding-left:10px}
+.tarea{display:flex;gap:9px;align-items:flex-start;padding:3px 0;font-size:14px}
+.tarea input{margin-top:3px;accent-color:var(--marino2);width:16px;height:16px;flex:none}
+.tarea .tx{flex:1;cursor:default}
+.tarea[data-edit] .tx{cursor:pointer}
+.tarea.hecha .tx{text-decoration:line-through;opacity:.55}
+.tarea small{color:var(--suave)}
+.vacio-dia{color:#9AA7B8;font-size:13px;padding:6px 0}
+.etq{display:inline-block;font-size:10px;font-weight:800;border-radius:5px;padding:1px 6px;margin-right:5px;background:#E6ECF4;color:var(--marino);letter-spacing:.04em}
+.etq.dgii{background:#D5F2E2;color:#12703B}.etq.google{background:#E6ECF4;color:#334155}.etq.reunion{background:#E8DDFB;color:#5B34C4}.etq.cita{background:#D6E6F8;color:#14518F}.etq.fecha{background:#FFDDE0;color:#B3151C}.etq.recordatorio{background:#FFF0C7;color:#8A5A00}
+
+/* ----- tarjetas laterales ----- */
+.panel{background:var(--tarjeta);border:1px solid var(--linea);border-radius:14px;box-shadow:var(--sombra);padding:14px 16px;margin-bottom:16px}
+.panel-t{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px}
+.panel-t h3{margin:0;font-size:22px;color:var(--marino)}
+.panel-t small{display:block;letter-spacing:.18em;font-size:11px;color:var(--suave)}
+.rango{background:var(--marino);color:#fff;border-radius:10px;padding:8px 14px;text-align:center;font-weight:600;font-size:14px;line-height:1.2}
+.rec{display:grid;grid-template-columns:5px 1fr auto 22px;gap:10px;align-items:center;border:1px solid var(--linea);border-radius:10px;overflow:hidden;margin-bottom:8px;padding:9px 12px 9px 0;background:#fff}
+.rec .barra-c{align-self:stretch;border-radius:0}
+.rec b{display:block;font-size:14px}.rec small{color:var(--suave);font-size:12.5px}
+.rec .cuando{font-size:12.5px;color:var(--tinta);text-align:right;white-space:nowrap}
+.rec input{width:18px;height:18px;accent-color:var(--marino2)}
+.rec.hecha b,.rec.hecha small{text-decoration:line-through;opacity:.55}
+.apunte h4{margin:12px 0 3px;font-size:14px}
+.apunte ul{margin:0;padding-left:18px;color:#3A4658;font-size:13.5px}
+.vacio{color:var(--suave);text-align:center;padding:14px 8px}
+.pie-metas{background:var(--marino);color:#fff;border-radius:14px;padding:16px 18px;display:flex;justify-content:space-between;align-items:center;gap:14px;margin-top:6px}
+.pie-metas ul{margin:6px 0 0;padding-left:18px;font-size:13.5px}
+.pie-metas .tupuedes{font:400 28px Caveat,'Segoe Script',cursive;transform:rotate(-4deg)}
+.efe p{margin:0 0 6px;font-size:13.5px}
+.efe b{color:var(--acento)}
+.card{background:var(--tarjeta);border:1px solid var(--linea);border-radius:12px;padding:12px 14px;margin:0 0 8px;box-shadow:var(--sombra)}
+.card.hecho{opacity:.55}
+.item{display:flex;gap:12px;align-items:flex-start}
+.hora{min-width:54px;font-weight:700;color:var(--acento);font-size:14px;padding-top:2px}
+.item b{display:block}.item small{color:var(--suave)}
+.tag{display:inline-block;font-size:11px;font-weight:700;border-radius:6px;padding:1px 7px;margin-right:6px;background:#E6ECF4;color:var(--marino)}
+.tag.cita{background:#D6E6F8}.tag.reunion{background:#E8DDFB;color:#5B34C4}.tag.recordatorio{background:#FFF0C7;color:#8A5A00}.tag.fecha{background:#FFDDE0;color:#B3151C}.tag.dgii{background:#D5F2E2;color:#12703B}
+.dia{font-weight:700;margin:16px 0 6px;font-size:15px;color:var(--marino)}
+.dia span{color:var(--suave);font-weight:500}
+.venc{display:flex;justify-content:space-between;gap:10px;align-items:center}
+.venc .quedan{font-weight:700;text-align:right;min-width:78px}
+.quedan.urgente{color:var(--alerta)}.quedan.pronto{color:var(--ambar)}
+.nota{color:var(--suave);font-size:13px}
+
+/* ----- botones y formulario ----- */
+button{font:inherit;cursor:pointer}
+.btn,.botones button,.mini{background:var(--marino2);color:#fff;border:0;border-radius:10px;padding:10px 16px;font-weight:600}
+.sec,.botones .sec{background:#fff!important;color:var(--marino)!important;border:1px solid var(--linea)!important}
+.mini{padding:5px 11px;font-size:12.5px;border-radius:8px}
+.fab{position:fixed;right:16px;bottom:calc(86px + env(safe-area-inset-bottom));width:56px;height:56px;border-radius:50%;border:0;background:var(--marino2);color:#fff;font-size:32px;line-height:1;box-shadow:0 6px 18px rgba(14,58,102,.4);z-index:5}
+.tabs{position:fixed;left:0;right:0;bottom:0;display:grid;grid-template-columns:repeat(6,1fr);background:#fff;border-top:1px solid var(--linea);padding-bottom:env(safe-area-inset-bottom);z-index:6}
+.tabs button{background:none;border:0;color:var(--suave);padding:9px 0 8px;font-size:11.5px;font-weight:600;display:flex;flex-direction:column;align-items:center;gap:1px}
+.tabs button i{font-style:normal;font-size:18px;line-height:1.1}
+.tabs button.on{color:var(--marino2)}
+dialog{border:0;border-radius:18px;padding:0;width:min(94vw,460px);background:#fff;color:var(--tinta);box-shadow:0 20px 60px rgba(0,0,0,.4)}
+dialog::backdrop{background:rgba(10,24,45,.55)}
+dialog form{padding:18px;display:grid;gap:12px}
+dialog h2{margin:0;font-size:20px;color:var(--marino)}
+label{display:grid;gap:4px;font-size:13px;font-weight:600;color:var(--suave)}
+label.check{display:flex;gap:8px;align-items:center;font-weight:500;color:var(--tinta);font-size:14px}
+input,select,textarea{font:inherit;color:var(--tinta);background:#F6F8FB;border:1px solid var(--linea);border-radius:10px;padding:10px;width:100%}
+input[type=checkbox]{width:auto}
+.fila{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.botones{display:flex;gap:10px;justify-content:flex-end}
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(150px + env(safe-area-inset-bottom));background:var(--marino);color:#fff;padding:10px 16px;border-radius:12px;font-size:14px;z-index:20;max-width:90vw}
+.grupo{display:flex;gap:8px;flex-wrap:wrap;margin:6px 0}
+.ajuste label{margin-bottom:10px}

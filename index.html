@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#14213D">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Mi Agenda">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<title>Mi Agenda</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;600&family=Great+Vibes&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<header class="top">
+  <div class="top-in">
+    <div class="marca">
+      <h1>Daniel A. Hernández</h1>
+      <span class="sem">AGENDA SEMANAL</span>
+      <span class="lema">PLANIFICA &nbsp;·&nbsp; ORGANIZA &nbsp;·&nbsp; LOGRA</span>
+    </div>
+    <div class="frase" id="fraseTop"></div>
+  </div>
+  <button id="btnGoogle" class="chip" type="button">Conectar Google</button>
+</header>
+<div class="barra">
+  <h2><span id="titulo">Esta semana</span><small id="subtitulo"></small></h2>
+  <span class="pill" id="pill" hidden></span>
+</div>
+
+<main id="vista"></main>
+
+<button id="fab" class="fab" type="button" aria-label="Nuevo">+</button>
+
+<nav class="tabs" id="tabs">
+  <button data-v="hoy" class="on"><i>▦</i>Semana</button>
+  <button data-v="agenda"><i>▤</i>Mes</button>
+  <button data-v="impuestos"><i>%</i>DGII</button>
+  <button data-v="dias"><i>★</i>Fechas</button>
+  <button data-v="correos"><i>✉</i>Correos</button>
+  <button data-v="ajustes"><i>⚙</i>Ajustes</button>
+</nav>
+
+<dialog id="dlg">
+  <form method="dialog" id="form">
+    <h2 id="dlgTitulo">Nuevo</h2>
+    <label>Qué es
+      <select name="tipo">
+        <option value="cita">Cita</option>
+        <option value="reunion">Reunión</option>
+        <option value="recordatorio">Recordatorio</option>
+        <option value="fecha">Fecha importante</option>
+      </select>
+    </label>
+    <label>Título <input name="titulo" required maxlength="120" placeholder="Ej.: Reunión con proveedor"></label>
+    <div class="fila">
+      <label>Fecha <input type="date" name="fecha" required></label>
+      <label>Hora <input type="time" name="hora"></label>
+    </div>
+    <label class="check"><input type="checkbox" name="todoDia"> Todo el día / sin hora</label>
+    <div class="fila">
+      <label>Avisarme
+        <select name="aviso">
+          <option value="0">A la hora</option>
+          <option value="10">10 min antes</option>
+          <option value="30" selected>30 min antes</option>
+          <option value="60">1 hora antes</option>
+          <option value="1440">1 día antes</option>
+          <option value="4320">3 días antes</option>
+          <option value="10080">1 semana antes</option>
+        </select>
+      </label>
+      <label>Se repite
+        <select name="repite">
+          <option value="no">No</option>
+          <option value="anual">Cada año</option>
+          <option value="mensual">Cada mes</option>
+          <option value="semanal">Cada semana</option>
+        </select>
+      </label>
+    </div>
+    <label>Notas <textarea name="notas" rows="2" maxlength="500"></textarea></label>
+    <label class="check"><input type="checkbox" name="enGoogle" checked> Guardar también en Google Calendar</label>
+    <div class="botones">
+      <button value="cancel" class="sec" formnovalidate>Cancelar</button>
+      <button value="ok" id="guardar">Guardar</button>
+    </div>
+  </form>
+</dialog>
+
+<dialog id="dlgTexto">
+  <form method="dialog" id="formTexto">
+    <h2 id="txtTitulo">Editar</h2>
+    <p class="nota" id="txtAyuda"></p>
+    <textarea name="texto" rows="10" maxlength="3000"></textarea>
+    <div class="botones">
+      <button value="cancel" class="sec" formnovalidate>Cancelar</button>
+      <button value="ok">Guardar</button>
+    </div>
+  </form>
+</dialog>
+
+<div id="aviso" class="toast" hidden></div>
+
+<script src="datos.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
